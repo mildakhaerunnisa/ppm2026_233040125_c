@@ -152,6 +152,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.edit_note),
+              title: const Text('Edit Pengalaman'),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ExperienceListPage(experiences: experiences),
+                  ),
+                );
+                if (result != null && result is List<ExperienceData>) {
+                  setState(() {
+                    experiences = result;
+                  });
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -603,6 +621,105 @@ class _EditExperiencePageState extends State<EditExperiencePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ExperienceListPage extends StatefulWidget {
+  final List<ExperienceData> experiences;
+  const ExperienceListPage({super.key, required this.experiences});
+
+  @override
+  State<ExperienceListPage> createState() => _ExperienceListPageState();
+}
+
+class _ExperienceListPageState extends State<ExperienceListPage> {
+  late List<ExperienceData> _tempExperiences;
+
+  @override
+  void initState() {
+    super.initState();
+    _tempExperiences = List.from(widget.experiences);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Manajemen Pengalaman'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: () {
+              Navigator.pop(context, _tempExperiences);
+            },
+          ),
+        ],
+      ),
+      body: _tempExperiences.isEmpty ||
+              (_tempExperiences.length == 1 &&
+                  _tempExperiences[0].title == 'Belum ada pengalaman')
+          ? const Center(child: Text('Tidak ada pengalaman untuk diedit'))
+          : ListView.builder(
+              itemCount: _tempExperiences.length,
+              itemBuilder: (context, index) {
+                final exp = _tempExperiences[index];
+                return ListTile(
+                  leading: exp.image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.memory(
+                            exp.image!,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const Icon(Icons.image, size: 50),
+                  title: Text(exp.title),
+                  subtitle: Text(
+                    exp.description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Color(0xFF6750A4)),
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditExperiencePage(data: exp),
+                            ),
+                          );
+                          if (result != null && result is ExperienceData) {
+                            setState(() {
+                              _tempExperiences[index] = result;
+                            });
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            _tempExperiences.removeAt(index);
+                            if (_tempExperiences.isEmpty) {
+                              _tempExperiences.add(ExperienceData(
+                                title: 'Belum ada pengalaman',
+                                description: 'Tambahkan pengalaman melalui drawer.',
+                              ));
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }
