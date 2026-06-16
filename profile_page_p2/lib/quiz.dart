@@ -77,10 +77,12 @@ class _ProfilePageState extends State<ProfilePage> {
     skills: ['Flutter', 'Dart', 'Java', 'Python', 'Git'],
   );
 
-  ExperienceData experience = ExperienceData(
-    title: 'Belum ada pengalaman',
-    description: 'Tambahkan pengalaman melalui drawer.',
-  );
+  List<ExperienceData> experiences = [
+    ExperienceData(
+      title: 'Belum ada pengalaman',
+      description: 'Tambahkan pengalaman melalui drawer.',
+    )
+  ];
 
   void _updateProfile(ProfileData newData) {
     setState(() {
@@ -88,9 +90,14 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  void _updateExperience(ExperienceData newData) {
+  void _addExperience(ExperienceData newData) {
     setState(() {
-      experience = newData;
+      if (experiences.length == 1 &&
+          experiences[0].title == 'Belum ada pengalaman') {
+        experiences = [newData];
+      } else {
+        experiences.add(newData);
+      }
     });
   }
 
@@ -135,11 +142,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EditExperiencePage(data: experience),
+                    builder: (_) => EditExperiencePage(
+                      data: ExperienceData(title: '', description: ''),
+                    ),
                   ),
                 );
                 if (result != null && result is ExperienceData) {
-                  _updateExperience(result);
+                  _addExperience(result);
                 }
               },
             ),
@@ -218,59 +227,66 @@ class _ProfilePageState extends State<ProfilePage> {
             _SectionCard(
               icon: Icons.work,
               title: 'Pengalaman',
-              contentWidget: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    if (experience.image != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.memory(
-                          experience.image!,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    else
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.image),
-                      ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            experience.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          Text(
-                            experience.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              trailing: CircleAvatar(
+                radius: 12,
+                backgroundColor: const Color(0xFF6750A4),
+                child: Text(
+                  '${experiences.length}',
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
+              ),
+              contentWidget: Column(
+                children: experiences.map((exp) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (exp.image != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.memory(
+                              exp.image!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        else
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.image),
+                          ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                exp.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                exp.description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -616,12 +632,14 @@ class _SectionCard extends StatelessWidget {
   final String title;
   final String? content;
   final Widget? contentWidget;
+  final Widget? trailing;
 
   const _SectionCard({
     required this.icon,
     required this.title,
     this.content,
     this.contentWidget,
+    this.trailing,
   });
 
   @override
@@ -639,12 +657,18 @@ class _SectionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (trailing != null) trailing!,
+                    ],
                   ),
                   const SizedBox(height: 6),
                   if (content != null)
