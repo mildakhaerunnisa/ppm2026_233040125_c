@@ -336,7 +336,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _educationController = TextEditingController(text: widget.data.education);
     _locationController = TextEditingController(text: widget.data.location);
     _contactController = TextEditingController(text: widget.data.contact);
-    _skillsController = TextEditingController(text: widget.data.skills.join(' '));
+    _skillsController = TextEditingController(text: widget.data.skills.join(', '));
     _imageBytes = widget.data.image;
   }
 
@@ -435,7 +435,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             TextField(
               controller: _skillsController,
               decoration: const InputDecoration(
-                labelText: 'Skills (pisahkan dengan spasi)',
+                labelText: 'Skills (pisahkan dengan koma)',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -453,7 +453,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     contact: _contactController.text,
                     skills:
                         _skillsController.text
-                            .split(' ')
+                            .split(',')
                             .map((e) => e.trim())
                             .where((e) => e.isNotEmpty)
                             .toList(),
